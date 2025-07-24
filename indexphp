@@ -1,0 +1,36 @@
+<?php
+// Suponiendo que ya tienes los IDs seleccionados del vuelo y hotel
+$id_vuelo = $_POST['id_vuelo'];
+$id_hotel = $_POST['id_hotel'];
+$conexion = new mysqli('localhost', 'usuario', 'clave', 'agencia_pudu');
+
+// Verificar disponibilidad de vuelo
+$sql_vuelo = "SELECT plazas FROM vuelo WHERE id = $id_vuelo";
+$result_vuelo = $conexion->query($sql_vuelo);
+$vuelo = $result_vuelo->fetch_assoc();
+
+if ($vuelo['plazas'] <= 0) {
+    echo " No hay plazas disponibles en este vuelo. Por favor selecciona otro.";
+    exit;
+}
+
+// Verificar disponibilidad de hotel
+$sql_hotel = "SELECT habitaciones FROM hotel WHERE id = $id_hotel";
+$result_hotel = $conexion->query($sql_hotel);
+$hotel = $result_hotel->fetch_assoc();
+
+if ($hotel['habitaciones'] <= 0) {
+    echo " No hay habitaciones disponibles en este hotel. Por favor elige otra opción.";
+    exit;
+}
+
+// Si todo está disponible, continuar con la reserva
+$sql_reserva = "INSERT INTO reserva (id_vuelo, id_hotel, cliente) VALUES ($id_vuelo, $id_hotel, 'NombreCliente')";
+$conexion->query($sql_reserva);
+
+// Actualizar disponibilidad
+$conexion->query("UPDATE vuelo SET plazas = plazas - 1 WHERE id = $id_vuelo");
+$conexion->query("UPDATE hotel SET habitaciones = habitaciones - 1 WHERE id = $id_hotel");
+
+echo " ¡Reserva confirmada!";
+?>
