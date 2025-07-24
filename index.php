@@ -36,14 +36,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['confirmar_reserva']))
         $vuelo_id = $_POST['vuelo_id'];
         $hotel_id = $_POST['hotel_id'];
 
-        $sql = "INSERT INTO reserva (cliente_id, fecha_reserva, vuelo_id, hotel_id)
-                VALUES ($cliente_id, '$fecha', $vuelo_id, $hotel_id)";
-        
-        if ($conn->query($sql) === TRUE) {
+        // Verificar disponibilidad de vuelo
+        $sql_vuelo = "SELECT plazas_disponibles FROM vuelo WHERE vuelo_id = $vuelo_id";
+        $result_vuelo = $conn->query($sql_vuelo);
+        $vuelo = $result_vuelo->fetch_assoc();
+
+        if ($vuelo['plazas_disponibles'] <= 0) {
+        $notificacion = "❌ No hay plazas disponibles en este vuelo. Por favor selecciona otro.";
+            } else {
+        // Verificar disponibilidad de hotel
+        $sql_hotel = "SELECT habitaciones_disponibles FROM hotel WHERE hotel_id = $hotel_id";
+        $result_hotel = $conn->query($sql_hotel);
+        $hotel = $result_hotel->fetch_assoc();
+
+        if ($hotel['habitaciones_disponibles'] <= 0) {
+        $notificacion = "❌ No hay habitaciones disponibles en este hotel. Por favor elige otro.";
+            } else {
+        // Hacer reserva
+        $sql_reserva = "INSERT INTO reserva (cliente_id, fecha_reserva, vuelo_id, hotel_id)
+                        VALUES ($cliente_id, '$fecha', $vuelo_id, $hotel_id)";
+        if ($conn->query($sql_reserva) === TRUE) {
+            // Actualizar disponibilidad
+            $conn->query("UPDATE vuelo SET plazas_disponibles = plazas_disponibles - 1 WHERE vuelo_id = $vuelo_id");
+            $conn->query("UPDATE hotel SET habitaciones_disponibles = habitaciones_disponibles - 1 WHERE hotel_id = $hotel_id");
+
             $notificacion = "✅ ¡Reserva confirmada con éxito!";
+            session_unset();
+            session_destroy();
+            session_start();
+            session_regenerate_id(true);
         } else {
             $notificacion = "❌ Error al guardar la reserva: " . $conn->error;
+                }
+            }
         }
+
 
         session_unset();
         session_destroy();
