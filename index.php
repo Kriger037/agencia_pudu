@@ -157,13 +157,33 @@ function mostrarTabla($tipo) {
     global $conn;
 
     if ($tipo === "mostrar_vuelos") {
-        $res = $conn->query("SELECT * FROM vuelo");
-        echo "<h2>✈️ Vuelos disponibles</h2><ul>";
+        echo '<h2>Vuelos disponibles</h2>';
+        echo '<form method="POST">
+                <input type="hidden" name="vista" value="mostrar_vuelos">
+                <input type="text" name="buscar_origen" placeholder="Ciudad de origen">
+                <input type="date" name="buscar_fecha">
+                <button type="submit">Buscar</button>
+            </form>';
+
+        $filtro = "";
+        if (!empty($_POST['buscar_origen'])) {
+            $origen = $conn->real_escape_string($_POST['buscar_origen']);
+            $filtro .= " AND origen LIKE '%$origen%'";
+        }
+        if (!empty($_POST['buscar_fecha'])) {
+            $fecha = $conn->real_escape_string($_POST['buscar_fecha']);
+            $filtro .= " AND fecha = '$fecha'";
+        }
+
+        $res = $conn->query("SELECT * FROM vuelo WHERE 1 $filtro");
+
+        echo "<ul>";
         while ($v = $res->fetch_assoc()) {
             echo "<li>{$v['origen']} → {$v['destino']} | Fecha: {$v['fecha']} | \$ {$v['precio']}</li>";
         }
         echo "</ul>";
     }
+
 
     if ($tipo === "mostrar_hoteles") {
         $res = $conn->query("SELECT * FROM hotel");
