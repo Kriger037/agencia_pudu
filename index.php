@@ -197,6 +197,8 @@ function mostrarTabla($tipo) {
 <head>
     <meta charset="UTF-8">
     <title><?php echo $titulo; ?></title>
+    <script src="validaciones.js"></script>
+
     <style>
         body { 
             font-family: Arial; 
