@@ -1,6 +1,6 @@
 <?php
 
-
+echo("hola");
 // Seguridad de la sesión
 ini_set('session.cookie_httponly', 1);
 session_start();
