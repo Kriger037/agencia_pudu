@@ -286,6 +286,5 @@ function mostrarTabla($tipo) {
         ?>
     </div>
 </div>
-
 </body>
 </html>
