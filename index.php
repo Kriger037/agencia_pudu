@@ -1,4 +1,6 @@
 <?php
+
+echo("hola");
 // Seguridad de la sesión
 ini_set('session.cookie_httponly', 1);
 session_start();
@@ -103,11 +105,11 @@ function mostrarFormulario($tipo) {
         echo '<h2>✈️ Agregar vuelo</h2>
         <form method="POST">
             <input type="hidden" name="vista" value="vuelo">
-            <input type="text" name="origen" placeholder="Origen" required>
-            <input type="text" name="destino" placeholder="Destino" required>
-            <input type="date" name="fecha" required>
-            <input type="number" name="plazas" placeholder="Plazas disponibles" required>
-            <input type="number" name="precio" placeholder="Precio" step="0.01" required>
+            <input type="text" name="origen" placeholder="Origen">
+            <input type="text" name="destino" placeholder="Destino">
+            <input type="date" name="fecha" >
+            <input type="number" name="plazas" placeholder="Plazas disponibles">
+            <input type="number" name="precio" placeholder="Precio" step="0.01">
             <button type="submit">Guardar vuelo</button>
         </form>';
     }
@@ -116,10 +118,10 @@ function mostrarFormulario($tipo) {
         echo '<h2>🏨 Agregar hotel</h2>
         <form method="POST">
             <input type="hidden" name="vista" value="hotel">
-            <input type="text" name="nombre" placeholder="Nombre del hotel" required>
-            <input type="text" name="ubicacion" placeholder="Ubicación" required>
-            <input type="number" name="habitaciones" placeholder="Habitaciones disponibles" required>
-            <input type="number" name="tarifa" placeholder="Tarifa por noche" step="0.01" required>
+            <input type="text" name="nombre" placeholder="Nombre del hotel">
+            <input type="text" name="ubicacion" placeholder="Ubicación">
+            <input type="number" name="habitaciones" placeholder="Habitaciones disponibles">
+            <input type="number" name="tarifa" placeholder="Tarifa por noche" step="0.01">
             <button type="submit">Guardar hotel</button>
         </form>';
     }
@@ -132,9 +134,9 @@ function mostrarFormulario($tipo) {
         <form method="POST">
             <input type="hidden" name="vista" value="reserva">
             <label>ID Cliente:</label>
-            <input type="number" name="cliente_id" required>
+            <input type="number" name="cliente_id">
             <label>Fecha de reserva:</label>
-            <input type="date" name="fecha_reserva" required>
+            <input type="date" name="fecha_reserva">
             <label>Vuelo:</label>
             <select name="vuelo_id">';
         while ($v = $vuelos->fetch_assoc()) {
@@ -195,6 +197,9 @@ function mostrarTabla($tipo) {
 <head>
     <meta charset="UTF-8">
     <title><?php echo $titulo; ?></title>
+    <script src="feature/validaciones.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
     <style>
         body { 
             font-family: Arial; 
@@ -281,6 +286,5 @@ function mostrarTabla($tipo) {
         ?>
     </div>
 </div>
-
 </body>
 </html>
