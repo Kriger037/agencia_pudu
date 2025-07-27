@@ -157,39 +157,70 @@ function mostrarTabla($tipo) {
     global $conn;
 
     if ($tipo === "mostrar_vuelos") {
-        echo '<h2>Vuelos disponibles</h2>';
+        // Un solo título
+        echo "<h2>✈️ Vuelos disponibles</h2>"; 
+        
+        // Formulario de búsqueda, conservando valores para mejor UX
         echo '<form method="POST">
                 <input type="hidden" name="vista" value="mostrar_vuelos">
-                <input type="text" name="buscar_origen" placeholder="Ciudad de origen">
-                <input type="date" name="buscar_fecha">
+                <input type="text" name="buscar_origen" placeholder="Ciudad de origen" value="' . htmlspecialchars($_POST['buscar_origen'] ?? '') . '">
+                <input type="date" name="buscar_fecha" value="' . htmlspecialchars($_POST['buscar_fecha'] ?? '') . '">
                 <button type="submit">Buscar</button>
             </form>';
 
-        $filtro = "";
+        // Inicializar la consulta base y los parámetros
+        $sql = "SELECT * FROM vuelo WHERE 1"; 
+        $params = [];
+        $types = "";
+
+        // Construir la consulta y los parámetros para la sentencia preparada
         if (!empty($_POST['buscar_origen'])) {
-            $origen = $conn->real_escape_string($_POST['buscar_origen']);
-            $filtro .= " AND origen LIKE '%$origen%'";
+            $sql .= " AND origen LIKE ?";
+            $params[] = '%' . $_POST['buscar_origen'] . '%';
+            $types .= "s"; 
         }
         if (!empty($_POST['buscar_fecha'])) {
-            $fecha = $conn->real_escape_string($_POST['buscar_fecha']);
-            $filtro .= " AND fecha = '$fecha'";
+            $sql .= " AND fecha = ?";
+            $params[] = $_POST['buscar_fecha'];
+            $types .= "s"; 
         }
 
-        $res = $conn->query("SELECT * FROM vuelo WHERE 1 $filtro");
+        // Preparar la sentencia
+        $stmt = $conn->prepare($sql);
 
-        echo "<ul>";
-        while ($v = $res->fetch_assoc()) {
-            echo "<li>{$v['origen']} → {$v['destino']} | Fecha: {$v['fecha']} | \$ {$v['precio']}</li>";
+        // Manejo de errores en la preparación
+        if ($stmt === false) {
+            echo "<p style='color:red;'>Error al preparar la consulta: " . $conn->error . "</p>";
+            return; 
         }
-        echo "</ul>";
+
+        // Si hay parámetros, vincularlos a la sentencia
+        if (!empty($params)) {
+            call_user_func_array([$stmt, 'bind_param'], array_merge([$types], $params));
+        }
+
+        // Ejecutar la consulta y obtener resultados
+        $stmt->execute();
+        $res = $stmt->get_result();
+
+        if ($res->num_rows > 0) {
+            echo "<ul>";
+            while ($v = $res->fetch_assoc()) {
+                echo "<li>{$v['origen']} → {$v['destino']} | Fecha: {$v['fecha']} | $ {$v['precio']}</li>";
+            }
+            echo "</ul>";
+        } else {
+            echo "<p>No se encontraron vuelos con los criterios de búsqueda.</p>";
+        }
+
+        $stmt->close(); // Cerrar la sentencia preparada
     }
-
 
     if ($tipo === "mostrar_hoteles") {
         $res = $conn->query("SELECT * FROM hotel");
         echo "<h2>🏨 Hoteles disponibles</h2><ul>";
         while ($h = $res->fetch_assoc()) {
-            echo "<li>{$h['nombre']} - {$h['ubicacion']} - \$ {$h['tarifa_noche']}</li>";
+            echo "<li>{$h['nombre']} - {$h['ubicacion']} - $ {$h['tarifa_noche']}</li>";
         }
         echo "</ul>";
     }
